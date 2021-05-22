@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom'
 
 
-const Menu = () => {
+const Menu = ({notification}) => {
   const padding = {
     paddingRight: 5
   }
@@ -20,7 +20,8 @@ const Menu = () => {
       <a href='#' style={padding}>about</a> */}
       <Link style={padding} to="/anecdotes">anecdotes</Link>
       <Link style={padding} to="/create">create new</Link>
-      <Link style={padding} to="/">about</Link>
+      <Link style={padding} to="/about">about</Link>
+      <div>{notification}</div>
     </div>
   )
 }
@@ -75,7 +76,6 @@ const CreateNew = (props) => {
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
 
-
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
@@ -127,11 +127,21 @@ const App = () => {
     }
   ])
 
-  const [notification, setNotification] = useState('')
+  // const [notification, setNotification] = useState('')
+  const [notification, setNotification] = useState(null)
+  // const [newAnecdote, setNewAnecdote] = useState(null)
 
+  let timeoutID
   const addNew = (anecdote) => {
     anecdote.id = (Math.random() * 10000).toFixed(0)
     setAnecdotes(anecdotes.concat(anecdote))
+
+    setNotification(`a new anecdote ${anecdote.content} created!`)
+
+    clearTimeout(timeoutID)
+    timeoutID = setTimeout(()=>{
+      setNotification(null)
+    }, 10000)
   }
 
   const anecdoteById = (id) =>
@@ -157,7 +167,7 @@ const App = () => {
     <div>
       <h1>Software anecdotes</h1>
       {/* <Router> */}
-        <Menu />
+        <Menu notification={notification}/>
           <Switch>
             <Route path="/anecdotes/:id">
               <Anecdote anecdote={anecdote} />
@@ -166,13 +176,13 @@ const App = () => {
               <AnecdoteList anecdotes={anecdotes} />
             </Route>
             <Route path="/create">
-              <CreateNew addNew={addNew} />
+              {notification ? <Redirect to="/anecdotes"/> : <CreateNew addNew={addNew} />}
             </Route>
             <Route path="/about">
               <About />
             </Route>
             <Route path="/">
-              <Redirect to="/anecdotes"/>
+              <Redirect to="/about"/>
             </Route>
           </Switch>
       {/* </Router> */}
