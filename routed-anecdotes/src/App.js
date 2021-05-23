@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import {omit} from 'lodash'
 import {
   // BrowserRouter as Router,
   Switch,
@@ -7,7 +8,7 @@ import {
   Redirect,
   useRouteMatch,
 } from 'react-router-dom'
-
+import {useField} from './hooks'
 
 const Menu = ({notification}) => {
   const padding = {
@@ -71,19 +72,40 @@ const Footer = () => (
   </div>
 )
 
-const CreateNew = (props) => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
 
+
+const CreateNew = (props) => {
+  // const [content, setContent] = useState('')
+  // const [author, setAuthor] = useState('')
+  // const [info, setInfo] = useState('')
+
+  const content = useField()
+  const author = useField()
+  const info = useField()
+  
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0
     })
+  }
+
+  // let {reset, ...otherContent} = content
+  // let {reset, ...otherAuthor} = author
+  // let {reset, ...otherInfo} = info
+
+  const contentProps = omit(content, 'reset')
+  const authorProps = omit(author, 'reset')
+  const infoProps = omit(info, 'reset')
+
+  const handleReset = (e) => {
+    e.preventDefault()
+    content.reset()
+    author.reset()
+    info.reset()
   }
 
   return (
@@ -92,17 +114,21 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          {/* <input name='content' value={content} onChange={(e) => setContent(e.target.value)} /> */}
+          <input {...contentProps}/>
         </div>
         <div>
           author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          {/* <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} /> */}
+          <input {...authorProps}/>
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          {/* <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} /> */}
+          <input {...infoProps}/>
         </div>
-        <button>create</button>
+        <button >create</button>
+        <button onClick={handleReset}>reset</button>
       </form>
     </div>
   )
@@ -129,7 +155,7 @@ const App = () => {
 
   // const [notification, setNotification] = useState('')
   const [notification, setNotification] = useState(null)
-  // const [newAnecdote, setNewAnecdote] = useState(null)
+  const [newAnecdote, setNewAnecdote] = useState(null)
 
   let timeoutID
   const addNew = (anecdote) => {
